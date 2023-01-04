@@ -64,6 +64,12 @@ const config: HardhatUserConfig & NetworkUserConfig = {
         buyer: {
             default: 1,
         },
+        buyer2: {
+            default: 2,
+        },
+        buyer3: {
+            default: 3,
+        },
     },
     mocha: {
         timeout: 200000, //200 seconds

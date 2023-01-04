@@ -18,6 +18,10 @@ contract EventTicket is ERC721 {
     // The price of each ticket
     uint256 public ticketPrice;
 
+    uint256 public totalEarn;
+
+    uint256 public contractEarning;
+
     // The list of addresses that have purchased tickets
     mapping(uint256 => address) public ticketHolders;
 
@@ -41,17 +45,21 @@ contract EventTicket is ERC721 {
         // Transfer the ticket to the buyer
         _safeMint(msg.sender, _tokenId);
         ticketHolders[_tokenId] = msg.sender;
+        totalEarn = totalEarn + msg.value;
     }
 
     // The event organizer can call this function to withdraw the revenue from ticket sales
     function withdrawRevenue() public {
         require(msg.sender == organizer, "Only the event organizer can withdraw revenue");
-
+        require(totalEarn > 0, "There is not money to withdraw");
         // Calculate the total revenue from ticket sales
-        uint256 revenue = ticketPrice * totalTickets;
+        // uint256 revenue = ticketPrice * totalTickets;
 
         // Transfer the revenue to the event organizer
-        payable(organizer).transfer(revenue.div(20).mul(19));
+        uint256 toWithdraw = totalEarn;
+        totalEarn = 0;
+        payable(organizer).transfer(toWithdraw);
+        // contractEarning = contractEarning + toWithdraw.div(20).mul(1);
     }
 
     function listTicketToResale(uint256 _tokenId) public {
@@ -79,6 +87,8 @@ contract EventTicket is ERC721 {
         // pay 10% to the original organizer (artist)
         payable(organizer).transfer(newPrice.div(10).mul(1)); // 10%
         payable(prevOwner).transfer(newPrice.div(10).mul(9)); // 90%
+
+        totalEarn = totalEarn + newPrice.div(10).mul(1);
 
         _transfer(msg.sender, to, _tokenId);
         ticketHolders[_tokenId] = to;
